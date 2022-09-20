@@ -12,7 +12,3 @@ if ($_GET['type'] == 'signup') {
 if ($_GET['type'] == 'login') {
     echo $user->login($_POST);
 }
-
-if ($_GET['type'] == 'logout') {
-    echo $user->logout();
-}

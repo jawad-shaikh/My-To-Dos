@@ -76,13 +76,6 @@ class User
         }
     }
 
-    public function logout()
-    {
-        session_start();
-        session_unset();
-        session_destroy();
-    }
-
     private function runQuery($query)
     {
         $sql = $this->conn->query($query);
