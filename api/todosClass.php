@@ -1,41 +1,59 @@
 <?php
-class ToDo {
-    
-    public $conn;
-    public $category;
-    public $thingy;
 
-    function __construct() {
-        $this->conn = new mysqli("localhost", "root", "", "my-to-dos");
-        if(mysqli_connect_error()) {
-            trigger_error("Failed to connect to MySQL: " . mysqli_connect_error());
-        }
+include 'db_connection.php';
+
+class ToDo
+{
+
+    protected $db;
+    protected $conn;
+
+    function __construct()
+    {
+        $this->db = new Database();
+        $this->conn = $this->db->connect();
     }
 
-    public function createToDo($category, $thingy) {
-        $query = "INSERT INTO to_dos(category, thingy) VALUES('$category', '$thingy')";
-        $this->runQuery($query);
+    public function createToDo($post_data)
+    {
+        $category = $post_data['category'];
+        $thingy = $post_data['thingy'];
+
+        $query = "INSERT INTO to_dos(user_id, category, thingy) VALUES(99, '$category', '$thingy')";
+
+        if ($this->runQuery($query))
+            return json_encode(["success" => "created to do"]);
+        else
+            return json_encode(["failure" => "could not create to do"]);
     }
-    
-    public function getAllToDos() {
-        $query = "SELECT * FROM to_dos";
+
+    public function getAllToDos()
+    {
+        $query = "SELECT id, category, thingy FROM to_dos";
+
         $result = $this->runQuery($query);
         $users = $result->fetch_all(MYSQLI_ASSOC);
-        return $users;
-    }
-    
-    public function deleteToDo($id) {
-        $query = "DELETE FROM to_dos WHERE id = $id";
-        $this->runQuery($query);
+        return json_encode($users);
     }
 
-    public function runQuery($query) {
+    public function deleteToDo($post_data)
+    {
+        $id = $post_data['id'];
+
+        $query = "DELETE FROM to_dos WHERE id = $id";
+
+        if ($this->runQuery($query))
+            return json_encode(["success" => "deletd to do"]);
+        else
+            return json_encode(["failure" => "could not delete to do"]);
+    }
+
+    public function runQuery($query)
+    {
         $sql = $this->conn->query($query);
-        if ($sql) {
+        if ($sql)
             return $sql;
-        }else{
+        else
             echo "error occured";
-        }
     }
 }
-?>

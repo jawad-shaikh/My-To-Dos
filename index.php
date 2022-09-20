@@ -7,7 +7,7 @@
   <div class="headings">
     <h2>My To DOs</h2>
     <h3>Just Do That Shit</h3>
-    <a href="smoothies.php" class="btn">View To DOs</a>
+    <a href="todos.php" class="btn">View To DOs</a>
   </div>
 </header>
 

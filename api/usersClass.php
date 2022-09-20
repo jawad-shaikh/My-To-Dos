@@ -86,10 +86,9 @@ class User
     private function runQuery($query)
     {
         $sql = $this->conn->query($query);
-        if ($sql) {
+        if ($sql)
             return $sql;
-        } else {
+        else
             return "error occured";
-        }
     }
 }
