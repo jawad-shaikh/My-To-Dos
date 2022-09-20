@@ -21,10 +21,10 @@ class ToDo
 
         $query = "INSERT INTO to_dos(user_id, category, thingy) VALUES(99, '$category', '$thingy')";
 
-        if ($this->runQuery($query))
-            return json_encode(["success" => "created to do"]);
-        else
+        if (!$this->runQuery($query))
             return json_encode(["failure" => "could not create to do"]);
+
+        return json_encode(["success" => "created to do"]);
     }
 
     public function getAllToDos()
@@ -42,18 +42,18 @@ class ToDo
 
         $query = "DELETE FROM to_dos WHERE id = $id";
 
-        if ($this->runQuery($query))
-            return json_encode(["success" => "deletd to do"]);
-        else
+        if (!$this->runQuery($query))
             return json_encode(["failure" => "could not delete to do"]);
+
+        return json_encode(["success" => "deleted to do"]);
     }
 
     public function runQuery($query)
     {
         $sql = $this->conn->query($query);
-        if ($sql)
-            return $sql;
-        else
-            echo "error occured";
+        if (!$sql)
+            return "error occured";
+
+        return $sql;
     }
 }

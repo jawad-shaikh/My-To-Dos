@@ -20,28 +20,22 @@ class User
         $validation = new UserValidator($post_data);
         $errors = $validation->validateSignup();
 
-        if (empty($errors)) {
-            $username = $post_data['username'];
-            $email = $post_data['email'];
-            $password = $post_data['password'];
-
-            $query = "SELECT email FROM users WHERE email = '$email'";
-            $result = $this->runQuery($query);
-
-            if ($result->num_rows > 0) {
-                return json_encode(["email" => "email already exists"]);
-            } else {
-                $query = "INSERT INTO users(username, email, password) VALUES('$username', '$email', '$password')";
-                if ($this->runQuery($query)) {
-                    // $last_id = mysqli_insert_id($this->conn);
-                    // session_start();
-                    // $_SESSION['user_id'] = $last_id;
-                    return json_encode(["success" => "user created"]);
-                }
-            }
-        } else {
+        if ($errors)
             return json_encode($errors);
-        }
+
+        $username = $post_data['username'];
+        $email = $post_data['email'];
+        $password = $post_data['password'];
+
+        $query = "SELECT email FROM users WHERE email = '$email'";
+        $result = $this->runQuery($query);
+
+        if ($result->num_rows > 0)
+            return json_encode(["email" => "email already exists"]);
+
+        $query = "INSERT INTO users(username, email, password) VALUES('$username', '$email', '$password')";
+        if ($this->runQuery($query))
+            return json_encode(["success" => "user created"]);
     }
 
     public function login($post_data)
@@ -49,39 +43,33 @@ class User
         $validation = new UserValidator($post_data);
         $errors = $validation->validateLogin();
 
-        if (empty($errors)) {
-            $email = $post_data['email'];
-            $password = $post_data['password'];
-
-            $query = "SELECT email FROM users WHERE email = '$email'";
-            $result = $this->runQuery($query);
-
-            if ($result->num_rows == 0)
-                return json_encode(["email" => "email does not exist"]);
-
-            if ($result->num_rows > 0) {
-                $query = "SELECT * FROM users WHERE email = '$email' AND password = '$password'";
-                $result = $this->runQuery($query);
-
-                if ($result->num_rows > 0) {
-                    // session_start();
-                    // $_SESSION['user_id'] = $result['id'];
-                    return json_encode(["success" => "user login"]);
-                } else {
-                    return json_encode(["password" => "incorrect password"]);
-                }
-            }
-        } else {
+        if (empty($errors))
             return json_encode($errors);
-        }
+
+        $email = $post_data['email'];
+        $password = $post_data['password'];
+
+        $query = "SELECT email FROM users WHERE email = '$email'";
+        $result = $this->runQuery($query);
+
+        if ($result->num_rows == 0)
+            return json_encode(["email" => "email does not exist"]);
+
+        $query = "SELECT * FROM users WHERE email = '$email' AND password = '$password'";
+        $result = $this->runQuery($query);
+
+        if (!$result->num_rows > 0)
+            return json_encode(["password" => "incorrect password"]);
+
+        return json_encode(["success" => "user login"]);
     }
 
     private function runQuery($query)
     {
         $sql = $this->conn->query($query);
-        if ($sql)
-            return $sql;
-        else
+        if (!$sql)
             return "error occured";
+
+        return $sql;
     }
 }
