@@ -39,28 +39,32 @@ class UserValidator
 
   public function validateSignup()
   {
+    $data = [];
     foreach (self::$signupFields as $key => $value) {
       if (!array_key_exists($key, $this->data)) {
         $this->addError($key, $key . " is not present in the data");
-        return $this->errors;
+        return ['errors' => $this->errors];
       }
 
       $this->validate($key, $this->data[$key], $value['regex'], $value['error']);
+      $data += [$key => $this->data[$key]];
     }
-    return $this->errors;
+    return ['errors' => $this->errors, 'data' => $data];
   }
 
   public function validateLogin()
   {
+    $data = [];
     foreach (self::$loginFields as $key => $value) {
       if (!array_key_exists($key, $this->data)) {
         $this->addError($key, $key . " is not present in the data");
-        return $this->errors;
+        return ['errors' => $this->errors];
       }
 
       $this->validate($key, $this->data[$key], $value['regex'], $value['error']);
+      $data += [$key => $this->data[$key]];
     }
-    return $this->errors;
+    return ['errors' => $this->errors, 'data' => $data];
   }
 
   private function validate($field, $value, $regex, $error)

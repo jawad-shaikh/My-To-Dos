@@ -6,7 +6,7 @@ class Database
     private $host;
     private $user;
     private $password;
-    public $db;
+    private $db;
 
     public function __construct()
     {

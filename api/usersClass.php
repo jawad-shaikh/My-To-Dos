@@ -2,6 +2,7 @@
 
 include 'db_connection.php';
 include 'userValidatorClass.php';
+include 'crudFunctionsClass.php';
 
 class User
 {
@@ -18,46 +19,45 @@ class User
     public function signUp($post_data)
     {
         $validation = new UserValidator($post_data);
-        $errors = $validation->validateSignup();
+        $errors_and_data = $validation->validateSignup();
 
-        if ($errors)
-            return json_encode($errors);
+        if ($errors_and_data['errors'])
+            return json_encode($errors_and_data['errors']);
 
-        $username = $post_data['username'];
-        $email = $post_data['email'];
-        $password = $post_data['password'];
+        $selectQuery = CrudFunctions::selectQuery('users', 'email');
+        $selectQuery = $selectQuery . " WHERE email = '{$errors_and_data['data']['email']}'";
 
-        $query = "SELECT email FROM users WHERE email = '$email'";
-        $result = $this->runQuery($query);
-
+        $result = $this->runQuery($selectQuery);
         if ($result->num_rows > 0)
             return json_encode(["email" => "email already exists"]);
 
-        $query = "INSERT INTO users(username, email, password) VALUES('$username', '$email', '$password')";
-        if ($this->runQuery($query))
+        $insertQuery = CrudFunctions::insertQuery('users', $errors_and_data['data']);
+        if ($this->runQuery($insertQuery))
             return json_encode(["success" => "user created"]);
+
+        return json_encode(["failure" => "could not create user"]);
     }
 
     public function login($post_data)
     {
         $validation = new UserValidator($post_data);
-        $errors = $validation->validateLogin();
+        $errors_and_data = $validation->validateLogin();
 
-        if (empty($errors))
-            return json_encode($errors);
+        if ($errors_and_data['errors'])
+            return json_encode($errors_and_data['errors']);
 
-        $email = $post_data['email'];
-        $password = $post_data['password'];
+        $selectQuery = CrudFunctions::selectQuery('users', 'email');
+        $selectQuery = $selectQuery . " WHERE email = '{$errors_and_data['data']['email']}'";
 
-        $query = "SELECT email FROM users WHERE email = '$email'";
-        $result = $this->runQuery($query);
-
+        $result = $this->runQuery($selectQuery);
         if ($result->num_rows == 0)
             return json_encode(["email" => "email does not exist"]);
 
-        $query = "SELECT * FROM users WHERE email = '$email' AND password = '$password'";
-        $result = $this->runQuery($query);
+        $query = CrudFunctions::selectQuery('users', 'email');
+        $query = $query . " WHERE email = '{$errors_and_data['data']['email']}' AND password = '{$errors_and_data['data']['password']}'";
 
+
+        $result = $this->runQuery($query);
         if (!$result->num_rows > 0)
             return json_encode(["password" => "incorrect password"]);
 
@@ -66,10 +66,9 @@ class User
 
     private function runQuery($query)
     {
-        $sql = $this->conn->query($query);
-        if (!$sql)
-            return "error occured";
-
-        return $sql;
+        if ($sql = $this->conn->query($query)) {
+            return $sql;
+        }
+        return "error occured";
     }
 }
